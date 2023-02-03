@@ -1,4 +1,3 @@
-
 document.addEventListener('animationend',e=>{
 	let $pop = e.target;
 	if(!$pop.classList.contains('popup')) return;
@@ -11,7 +10,6 @@ let pop = t =>{
 	$pop.textContent = `設定を${t=='set'?'変更':'初期化'}しました`;
 	document.body.appendChild($pop);
 }
-
 textChanger({
 	'姓':　'見本',
 	'名':　'例子'
