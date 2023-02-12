@@ -3,10 +3,12 @@ function textChanger(dflt,opt) {
 let on = 'addEventListener';
 let $d = document;
 let $id = id => (id instanceof HTMLElement)?id:$d.getElementById(id);
+let tc = textChanger;
 
 let set = Object.assign({
 	setBtnId: 'changeSet',
 	clrBtnId: 'changeClr',
+	areaId: null,
 	btnEvent: null,
 	storage: 'session',
 	path: 'textChanger',
@@ -29,7 +31,7 @@ function setting(){
 	let bF = !!$set||!!$clr;
 	let iF = false;
 	let lF = bF && (bET=='function'||!sF);
-	let nF = typeof textChangerNodes=='object' && Array.isArray(textChangerNodes);
+	let nF = Array.isArray(tc.nodes);
 	for(let k of keys){
 		$list[k] = {};
 		if(lF) $list[k].node = [];
@@ -45,36 +47,36 @@ function setting(){
 		} else {
 			$e.textContent = data[k];
 			if(lF) $list[k].node.push($e.childNodes[0]);
-			if(nF) textChangerNodes.push($e.childNodes[0]);
+			if(nF) tc.nodes.push($e.childNodes[0]);
 		}
 	});
-	if(set.word) {
+	if(!!set.word) {
 		let t = set.word.match(/key|default/);
 		if(t){
-			let regEsc = str => str.replace(/[\-\/\\|^$*+?.(){}\[\]]/g,'\x5c$&');
+			let regEsc = str => str.replace(/[\-\/\|^$*+?.(){}\[\]]/g,'\x5c$&');
 			let wP = (e,k) => {w[e]=k;reg+=(reg.length?'|':'')+regEsc(e)};
 			let w={},reg='';
 			let rTN, rTNs = $elm =>{
 				let ns = Array.from($elm.childNodes);
 				for(let n of ns){
-					if(n.nodeType==1&&!n.matches('script,['+set.attr+']')) rTNs(n);
+					if(n.nodeType==1&&!n.matches('script,['+set.attr+'],.no-change')) rTNs(n);
 					else if(n.nodeType==3) rTN(n);
 				}
 			}
 			if(t[0]=='key') for(let k of keys) wP(k,k);
 			else for(let k of keys) wP(dflt[k],k);
-			reg = regEsc(set.word).replace(RegExp(t[0]),'('+reg+')');
+			reg = regEsc(set.word).replace(t[0],'('+reg+')');
 			if(lF||nF) {
 				reg = RegExp(reg);
 				rTN = n =>{
-					if(nF&&textChangerNodes.includes(n)) return;
+					if(nF&&tc.nodes.includes(n)) return;
 					let m = n.nodeValue.match(reg);
 					if(!!m){
 						let l = m.index+m[0].length;
 						if(m.input.length!=l) rTN(n.splitText(l));
 						let nn = !m.index?n:n.splitText(m.index);
 						if(lF) $list[w[m[1]]].node.push(nn);
-						if(nF) textChangerNodes.push(nn);
+						if(nF) tc.nodes.push(nn);
 						nn.nodeValue = data[w[m[1]]];
 					}
 				}
@@ -117,6 +119,7 @@ function setting(){
 		}
 	}
 }
+
 if($d.readyState=='loading') $d[on]('DOMContentLoaded',setting);
 else setting();
 
